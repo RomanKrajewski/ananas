@@ -8,7 +8,7 @@ function init() {
     renderer = new THREE.WebGLRenderer();
     renderer.setSize( window.innerWidth, window.innerHeight );
 
-    // renderer.shadowMap.enabled = true;
+    renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.shadowMapSoft = true;
 
@@ -28,7 +28,7 @@ function init() {
     // var hemisphereLight = new THREE.HemisphereLight( 0xFFFFFF, 0xFFFFFF, 0.6 );
     // scene.add( hemisphereLight );
 
-    spotLight = new THREE.SpotLight(0xFFFFFF,0.6, 300, toRadians(60), 0.7,0.1);
+    spotLight = new THREE.SpotLight(0xFFFFFF,0.6, 300, toRadians(15), 0.7,0.1);
     spotLight.position.x = -24.8;
     spotLight.position.z = -24.8;
     spotLight.position.y = 32;
@@ -36,8 +36,8 @@ function init() {
 
     spotLight.castShadow = true;
 
-    spotLight.shadow.mapSize.width = 4096;
-    spotLight.shadow.mapSize.height = 4096;
+    spotLight.shadow.mapSize.width = 512;
+    spotLight.shadow.mapSize.height = 512;
     spotLight.shadow.camera.near = 25;
     spotLight.shadow.camera.far = 150;
 

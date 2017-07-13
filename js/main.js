@@ -1,5 +1,6 @@
-var camera, scene, renderer,dummy, mainObject, standardMaterial, startTime, spotLight, spotLight2, cameraTarget, wasSplit, wasReflected;
+var camera, scene, renderer,dummy, mainObject, standardMaterial, startTime, spotLight, spotLight2, cameraTarget, wasSplit, wasReflected, rotateAllTween, useShaders;
 var lastFrame = null;
+var shaderTime = 0;
 init();
 
 
@@ -75,8 +76,84 @@ function init() {
     camera.lookAt(cameraTarget);
 
 
+    //Init DAT GUI control panel
+    badTVParams = {
+        mute:true,
+        show: true,
+        distortion: 2.5,
+        distortion2: 2.5,
+        speed: 0.02,
+        rollSpeed: 0
+    };
+    staticParams = {
+        show: true,
+        amount:0.05,
+        size:4.0
+    };
+    rgbParams = {
+        show: true,
+        amount: 0.002,
+        angle: 20,
+    };
+    filmParams = {
+        show: true,
+        count: 800,
+        sIntensity: 0.2,
+        nIntensity: 0.3
+    };
+
+
+
+    composer = new THREE.EffectComposer( renderer);
+    renderPass = new THREE.RenderPass( scene, camera );
+    badTVPass = new THREE.ShaderPass( THREE.BadTVShader );
+    rgbPass = new THREE.ShaderPass( THREE.RGBShiftShader );
+    filmPass = new THREE.ShaderPass( THREE.FilmShader );
+    staticPass = new THREE.ShaderPass( THREE.StaticShader );
+    copyPass = new THREE.ShaderPass( THREE.CopyShader );
+    composer.addPass( renderPass );
+    composer.addPass( copyPass );
+    copyPass.renderToScreen = true;
+    document.getElementById("shaderSwitch").addEventListener("click", onToggleShaders);
+
+    filmPass.uniforms.grayscale.value = 0;
+
+    onParamsChange();
+
     placeMainObject();
 }
+
+function onToggleShaders(){
+    shaderSwitch = document.getElementById("shaderSwitch");
+    useShaders = shaderSwitch.checked;
+    composer = new THREE.EffectComposer( renderer);
+    composer.addPass( renderPass );
+    if(useShaders){
+        composer.addPass( filmPass );
+        composer.addPass( badTVPass );
+        composer.addPass( rgbPass );
+        composer.addPass( staticPass );
+    }
+    composer.addPass( copyPass );
+    copyPass.renderToScreen = true;
+}
+
+function onParamsChange() {
+    //copy gui params into shader uniforms
+    badTVPass.uniforms[ 'distortion' ].value = badTVParams.distortion;
+    badTVPass.uniforms[ 'distortion2' ].value = badTVParams.distortion2;
+    badTVPass.uniforms[ 'speed' ].value = badTVParams.speed;
+    badTVPass.uniforms[ 'rollSpeed' ].value = badTVParams.rollSpeed;
+    staticPass.uniforms[ 'amount' ].value = staticParams.amount;
+    staticPass.uniforms[ 'size' ].value = staticParams.size;
+    rgbPass.uniforms[ 'angle' ].value = rgbParams.angle*Math.PI;
+    rgbPass.uniforms[ 'amount' ].value = rgbParams.amount;
+    filmPass.uniforms[ 'sCount' ].value = filmParams.count;
+    filmPass.uniforms[ 'sIntensity' ].value = filmParams.sIntensity;
+    filmPass.uniforms[ 'nIntensity' ].value = filmParams.nIntensity;
+}
+
+
 
 function placeMainObject(){
     var jsonLoader = new THREE.JSONLoader();
@@ -101,7 +178,7 @@ function placeMainObject(){
             wasReflected = false;
             dummy.add( mainObject );
             scene.add(dummy);
-            TweenMax.from(dummy.scale, 0.5, {x:0,y:0,z:0, delay: 1});
+            TweenMax.fromTo(dummy.scale,.5, {x:0,y:0,z:0},{x:1,y:1,z:1, delay: 1});
             // TweenMax.delayedCall(2, splitSequence);
             animate();
 
@@ -112,12 +189,24 @@ function placeMainObject(){
 function splitSequence(){
     TweenMax.to(dummy.scale, 0.5, {x:0,y:0,z:0, onComplete:function(){
         scene.remove(dummy);
-        dummy = splitUpObject(10,5.5);
+        dummy = splitUpObject(16,5.5);
         scene.add(dummy);
         TweenMax.from(dummy.scale, 0.5, {x:0,y:0,z:0, delay: 0.5});
-        TweenMax.to(dummy.rotation, 20, {z:toRadians(360), repeat:-1, ease:Linear.easeNone});
+        rotateAllTween = TweenMax.to(dummy.rotation, 30, {z:toRadians(360), repeat:-1, ease:Linear.easeNone});
     }});
 
+}
+
+function unsplitSequence(){
+    TweenMax.to(dummy.scale,0.5, {x:0,y:0,z:0, onComplete:function(){
+        rotateAllTween.kill();
+        scene.remove(dummy);
+        dummy = new THREE.Mesh(new THREE.CubeGeometry(.001, .001, .001), standardMaterial);
+        mainObject.rotation.y = 20;
+        dummy.add(mainObject);
+        scene.add(dummy);
+        TweenMax.from(dummy.scale, 0.5, {x:0,y:0,z:0, delay: 0.5});
+    }});
 }
 
 function splitUpObject(numberOfClones, radius){
@@ -171,22 +260,33 @@ function animate() {
 function update() {
     var timePassed = getTimeSinceLastFrame();
     var animationConstant = timePassed/100 ;
-    if(mainObject.rotation.y > 100 && wasSplit == false){
-        splitSequence();
+    if(dummy.children[0].rotation.y > 50 && wasSplit == false){
         wasSplit = true;
+        splitSequence();
     }
-    if(mainObject.rotation.y < -100 && wasReflected == false){
+    if(dummy.children[0].rotation.y < -25 && wasSplit == true){
+        wasSplit = false;
+        unsplitSequence();
+    }
+    if(dummy.children[0].rotation.y < -50 && wasReflected == false){
         TweenMax.to(standardMaterial, 0.5, {reflectivity:0.2});
         wasReflected = true;
     }
-    if(mainObject.rotation.y > 0 && wasReflected == true){
+    if(dummy.children[0].rotation.y > -25 && wasReflected == true){
         TweenMax.to(standardMaterial, 0.5, {reflectivity:0.0});
         wasReflected = false;
     }
     spotLight.color = determineHSLColour(0);
     spotLight2.color = determineHSLColour(120);
     spotLight3.color = determineHSLColour(240);
-    renderer.render( scene, camera );
+    // renderer.render( scene, camera );
+
+    shaderTime += 0.1;
+    badTVPass.uniforms[ 'time' ].value =  shaderTime;
+    filmPass.uniforms[ 'time' ].value =  shaderTime;
+    staticPass.uniforms[ 'time' ].value =  shaderTime;
+
+    composer.render( 0.1 );
 }
 
 var mouseDown = false,

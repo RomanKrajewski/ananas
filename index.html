@@ -1,21 +1,75 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<link rel="apple-touch-icon" sizes="180x180" href="./favicon/apple-touch-icon.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="./favicon/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="./favicon/favicon-16x16.png">
+		<link rel="manifest" href="./favicon/manifest.json">
+		<link rel="mask-icon" href="./favicon/safari-pinned-tab.svg" color="#b13adb">
+		<link rel="shortcut icon" href="./favicon/favicon.ico">
+		<meta name="msapplication-config" content="./favicon/browserconfig.xml">
+		<meta name="theme-color" content="#ffffff">
 		<meta charset=utf-8>
 		<title>ananas</title>
 		<link rel="stylesheet" href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 		<style>
 			body { margin: 0; }
 			#canvas_wrapper {width:100%; height:100%}
 			canvas { width: 100%; height: 100% }
+			#showNav{position:absolute; top:15px; left:15px; color:black}
+			#hideNav{position:absolute; top:15px; left:15px; color:white; visibility:hidden}
+			#settings{position:absolute; top:0px; left:0px; width:100%; height:100%; background-color:rgba(0,0,0,0.8); visibility:hidden}
+			#menue:target div#settings{visibility:visible}
+			#menue:target a#hideNav{visibility:visible}
+			.switch input{display:none}
+			.switch {
+				position: fixed;
+				top: 20%;
+				left: 20%;
+				cursor: pointer;
+				color: white;
+			}
+			input:checked + .fingericon{
+				color: #80FFB7;
+			}
 		</style>
+
+
+
 	</head>
-	<body>
+	<body id="menue">
 		<div id="canvas_wrapper"></div>
+
+		<div id="settings">
+			<label class="switch">
+				<input type="checkbox" id="shaderSwitch">
+				<span class="fa-stack fa-4x fingericon">
+				<i class="fa fa-square-o fa-stack-2x"></i>
+				<i class="fa fa-filter fa-stack-1x"></i>
+			</span>
+			</label>
+		</div>
+
+		<a id = "showNav" href="#menue"><i class="fa fa-bars fa-3x" aria-hidden="true"></i></a>
+		<a id = "hideNav" href="#nomenue"><i class="fa fa-bars fa-3x" aria-hidden="true"></i></a>
+
 
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/85/three.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.19.1/TweenMax.min.js"></script>
 		<script src="js/OrbitControls.js"></script>
+		<script src="js/BadTVShader.js"></script>
+
+		<script src='lib/postprocessing/EffectComposer.js'></script>
+		<script src='lib/postprocessing/RenderPass.js'></script>
+		<script src='lib/postprocessing/ShaderPass.js'></script>
+		<script src='lib/postprocessing/MaskPass.js'></script>
+		<script src='lib/shaders/CopyShader.js'></script>
+		<script src='lib/shaders/FilmShader.js'></script>
+		<script src='lib/shaders/RGBShiftShader.js'></script>
+		<script src='js/BadTVShader.js'></script>
+		<script src='js/StaticShader.js'></script>
+
 		<script src = "js/main.js"></script>
 	</body>
 </html>

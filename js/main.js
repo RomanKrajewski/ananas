@@ -7,6 +7,7 @@ init();
 function init() {
 
     renderer = new THREE.WebGLRenderer();
+    renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setSize( window.innerWidth, window.innerHeight );
 
 
@@ -114,6 +115,7 @@ function init() {
     composer.addPass( renderPass );
     composer.addPass( copyPass );
     copyPass.renderToScreen = true;
+    composer.setSize(window.innerWidth, window.innerHeight);
     document.getElementById("shaderSwitch").addEventListener("click", onToggleShaders);
 
     filmPass.uniforms.grayscale.value = 0;
@@ -134,6 +136,7 @@ function onToggleShaders(){
         composer.addPass( rgbPass );
         composer.addPass( staticPass );
     }
+
     composer.addPass( copyPass );
     copyPass.renderToScreen = true;
 }
@@ -279,14 +282,19 @@ function update() {
     spotLight.color = determineHSLColour(0);
     spotLight2.color = determineHSLColour(120);
     spotLight3.color = determineHSLColour(240);
-    // renderer.render( scene, camera );
 
     shaderTime += 0.1;
     badTVPass.uniforms[ 'time' ].value =  shaderTime;
     filmPass.uniforms[ 'time' ].value =  shaderTime;
     staticPass.uniforms[ 'time' ].value =  shaderTime;
 
+    if(useShaders){
     composer.render( 0.1 );
+    }
+    else{
+    renderer.render( scene, camera );
+    }
+
 }
 
 var mouseDown = false,
@@ -431,6 +439,8 @@ function getTimeSinceLastFrame(){
 window.onresize = function(event){
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
+    renderer.setPixelRatio( window.devicePixelRatio );
+    composer.setSize(window.innerWidth, window.innerHeight);
     renderer.setSize( window.innerWidth, window.innerHeight );
 }
 

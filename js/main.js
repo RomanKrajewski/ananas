@@ -11,8 +11,8 @@ function init() {
     renderer.setSize( window.innerWidth, window.innerHeight );
 
 
-    // renderer.gammaInput = true;
-    // renderer.gammaOutput = true;
+    renderer.gammaInput = true;
+    renderer.gammaOutput = true;
 
     camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1100 );
     // orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -242,7 +242,7 @@ function determineColour(offset){
 
 function determineHSLColour(offset){
     var saturation = 100;
-    var lightness = 75;
+    var lightness = 65;
     var colourHues = [ 146,327,265];
     var totalTimePassed = ((performance.now() - startTime)/100) + offset;
     var colourDuration = 120;
